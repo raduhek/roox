@@ -7,9 +7,14 @@ typedef struct bbst_node_struct {
     struct bbst_node_struct *right;
 } bbst_node_t;
 
+typedef struct bbst_node_root_struct {
+    bbst_node_t *root;
+    int nodes_count;
+} bbst_node_root_t;
+
 bbst_node_t *new_bbst_node(int);
 
-bbst_node_t *bbst_root;
+bbst_node_root_t *bbst_root;
 
 #endif
 
