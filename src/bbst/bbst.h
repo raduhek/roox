@@ -4,6 +4,5 @@
 #include "bbst_node.h"
 
 void bbst_add(bbst_node_root_t **,int);
-void traverse();
 
 #endif
