@@ -1,14 +1,11 @@
+#include <stdlib.h>
 #include <stdio.h>
 
 #include "bbst.h"
 #include "bbst_node.h"
 
-int abs(int v) {
-    return v >= 0 ? v : -v;
-}
-
-void bbst_add(bbst_node_t **r, int val) {
-    bbst_node_t **t = r;
+void bbst_add(bbst_node_root_t **r, int val) {
+    bbst_node_t **t = &(*r)->root;
     bbst_node_t **parent = NULL;
 
     // Traverse the tree until a NULL node appears
@@ -24,6 +21,7 @@ void bbst_add(bbst_node_t **r, int val) {
 
     if (*t == NULL) {
         *t = new_bbst_node(val);
+        (*r)->nodes_count++;
     } else {
         return;
     }
