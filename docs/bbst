@@ -1,0 +1,8 @@
+# BBST - balanced binary tree #
+
+The BST described here is used to keep record of sentences where words appear.
+
+Each word in the trie will contain some information on it's leaf node.
+This information consists of three binary trees of what part of sentence the
+respective word consists of: AND, OR or NOT.
+
