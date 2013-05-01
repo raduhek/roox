@@ -6,7 +6,7 @@
 #include "../bbst/bbst.h"
 #include "../list/list_node.h"
 
-trie_node_t *new_trie_node(unsigned short int is_root) {
+trie_node_t *new_trie_node(char reaching_char, trie_node_t *parent, unsigned short int is_root) {
     int i = 0;
     trie_node_t *t = (trie_node_t*)malloc(sizeof(trie_node_t));
 
@@ -15,6 +15,8 @@ trie_node_t *new_trie_node(unsigned short int is_root) {
     }
     t->AND = t->OR = t->NOT = (bbst_node_root_t*)malloc(sizeof(bbst_node_root_t));
     t->is_root = is_root;
+    t->parent = parent;
+    t->reaching_char = reaching_char;
 
     return t;
 }
