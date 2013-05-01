@@ -4,7 +4,7 @@
 #include "list.h"
 #include "list_node.h"
 
-void list_add(list_node_t **r, char c) {
+void list_add(list_node_t **r, char c, trie_node_t *to) {
     list_node_t **t = r;
     list_node_t **parent = NULL;
 
@@ -21,7 +21,7 @@ void list_add(list_node_t **r, char c) {
         return;
     }
     
-    *t = new_list_node(c);
+    *t = new_list_node(c, to);
 
     // If parent is NULL, this is the first node in list
     if (parent == NULL) {
