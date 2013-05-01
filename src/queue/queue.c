@@ -4,7 +4,7 @@
 #include "queue_node.h"
 #include "queue.h"
 
-void push(queue_t *q, const void *val) {
+void push(queue_t *q, void *val) {
     queue_node_t *temp;
     if (q->head == NULL) {
         q->head = new_queue_node(val);
@@ -18,12 +18,15 @@ void push(queue_t *q, const void *val) {
 
 void *pop(queue_t *q) {
     queue_node_t *temp;
+    void *val;
     if (q->head == NULL) {
         return NULL;
     } else {
         temp = q->head;
+        val = temp->val;
         q->head = q->head->prev;
-        return temp;
+        free(temp);
+        return val;
     }
 
 }

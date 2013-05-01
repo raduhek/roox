@@ -13,7 +13,7 @@ typedef struct queue_struct {
 
 
 queue_t *new_queue();
-void push (queue_t *, const void *);
+void push (queue_t *, void *);
 void *pop (queue_t *);
 
 #endif
