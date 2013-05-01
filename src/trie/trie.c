@@ -24,3 +24,17 @@ void trie_insert(trie_node_t *root, char *word) {
     }
 }
 
+void trie_search(const trie_node_t *root, const char *word) {
+    int word_idx = 0;
+    int word_length = strlen(word);
+    const trie_node_t *current = root;
+
+    for (word_idx = 0; word_idx < word_length; ++word_idx) {
+        current = get_trie_node_children(current, WORD_CC);
+        if (current == NULL) {
+            return;
+        }
+    }
+    printf("found word: %s\n", word);
+    return;
+}
