@@ -14,7 +14,5 @@ typedef struct bbst_node_root_struct {
 
 bbst_node_t *new_bbst_node(int);
 
-bbst_node_root_t *bbst_root;
-
 #endif
 
