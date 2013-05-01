@@ -11,12 +11,9 @@ typedef struct queue_struct {
 
 } queue_t;
 
-queue_t *new_queue() {
-    queue_t *t = (queue_t*)malloc(sizeof(queue_t));
-    t->head = NULL;
-    t->tail = NULL;
 
-    return t;
-}
+queue_t *new_queue();
+void push (queue_t *, const void *);
+void *pop (queue_t *);
 
 #endif

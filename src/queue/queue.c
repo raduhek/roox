@@ -28,3 +28,10 @@ void *pop(queue_t *q) {
 
 }
 
+queue_t *new_queue() {
+    queue_t *t = (queue_t*)malloc(sizeof(queue_t));
+    t->head = NULL;
+    t->tail = NULL;
+
+    return t;
+}
