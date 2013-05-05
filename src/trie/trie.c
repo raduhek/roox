@@ -24,7 +24,7 @@ void trie_insert(trie_node_t *root, char *word) {
         }
         current = temp;
     }
-    set_trie_node_as_final(&current);
+    add_info_in_trie_node(current, 0, 0, 0);
 }
 
 void trie_compile(trie_node_t *root) {
