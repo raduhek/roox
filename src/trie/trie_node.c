@@ -46,6 +46,8 @@ inline unsigned short int is_trie_node_final(const trie_node_t *t) {
 }
 
 void add_info_in_trie_node(trie_node_t *node, int phrase_id_AND, int phrase_id_OR, int phrase_id_NOT) {
+    node->node_state = FINAL_NODE_ID;
+
     bbst_add(&node->AND, phrase_id_AND);
     bbst_add(&node->OR, phrase_id_OR);
     bbst_add(&node->NOT, phrase_id_NOT);
