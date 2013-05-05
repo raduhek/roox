@@ -5,7 +5,7 @@
 
 void trie_insert(trie_node_t *, const char *);
 void trie_compile(trie_node_t *);
-void trie_search(const trie_node_t *, const char *);
+void trie_match(const trie_node_t *, const char *);
 
 #endif
 
