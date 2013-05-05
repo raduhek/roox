@@ -24,6 +24,7 @@ void trie_insert(trie_node_t *root, char *word) {
         }
         current = temp;
     }
+    set_trie_node_as_final(&current);
 }
 
 void trie_compile(trie_node_t *root) {
@@ -51,7 +52,7 @@ void trie_compile(trie_node_t *root) {
 
         parent_fail = current->parent->fail;
         while (get_trie_node_children(parent_fail, current->reaching_char) != NULL &&
-               parent_fail != root) {
+               parent_fail->fail != root ) {
 
             parent_fail = parent_fail->fail;
         }
@@ -70,10 +71,9 @@ void trie_compile(trie_node_t *root) {
     return;
 }
 
-void trie_match(const trie_node_t *root, char *phrase) {
+void trie_match(const trie_node_t *root, char *phrase, void (*callback)(const trie_node_t *)) {
     const trie_node_t *current = root;
     const trie_node_t *temp;
-
     while (*phrase) {
 
         while((temp = get_trie_node_children(current, *phrase)) == NULL && 
@@ -81,7 +81,7 @@ void trie_match(const trie_node_t *root, char *phrase) {
             current = current->fail;
         }
 
-        if (0 == is_trie_node_root(current)) {
+        if (1 == is_trie_node_root(current)) {
             current = get_trie_node_children(root, *phrase);
 
             if (current == NULL) {
@@ -95,11 +95,12 @@ void trie_match(const trie_node_t *root, char *phrase) {
     
         while (temp != root) {
             if (1 == is_trie_node_final(temp)) {
-                printf("found match\n");
+                callback(temp);
             }
             temp = temp->fail;
         }
-
+        
+        phrase++;
     }
 }
 
