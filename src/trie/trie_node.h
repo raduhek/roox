@@ -5,8 +5,10 @@
 #include "../bbst/bbst.h"
 #include "../list/list_node.h"
 
-#define CHILDREN_BUCKETS 7
+#define CHILDREN_BUCKETS 9
 #define ROOT_ID 218
+#define FINAL_NODE_ID 113
+#define NORMAL_NODE_ID 17
 #define ROOT_CHAR '\0'
 
 typedef struct trie_node_struct {
@@ -15,7 +17,7 @@ typedef struct trie_node_struct {
     struct trie_node_struct *fail;
     struct trie_node_struct *parent;
 
-    int is_root;
+    int node_state;
 
     bbst_node_root_t *AND;
     bbst_node_root_t *OR;
@@ -25,6 +27,7 @@ typedef struct trie_node_struct {
 trie_node_t *new_trie_node(char, trie_node_t *, unsigned short int);
 trie_node_t *get_trie_node_children(const trie_node_t *, char);
 unsigned short int is_trie_node_root(const trie_node_t *);
+unsigned short int is_trie_node_final(const trie_node_t *);
 void add_info_in_trie_node(trie_node_t *, int, int, int);
 
 #endif

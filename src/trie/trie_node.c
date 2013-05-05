@@ -6,7 +6,7 @@
 #include "../bbst/bbst.h"
 #include "../list/list_node.h"
 
-trie_node_t *new_trie_node(char reaching_char, trie_node_t *parent, unsigned short int is_root) {
+trie_node_t *new_trie_node(char reaching_char, trie_node_t *parent, unsigned short int state) {
     int i = 0;
     trie_node_t *t = (trie_node_t*)malloc(sizeof(trie_node_t));
 
@@ -14,7 +14,7 @@ trie_node_t *new_trie_node(char reaching_char, trie_node_t *parent, unsigned sho
         t->children[i] = NULL;
     }
     t->AND = t->OR = t->NOT = (bbst_node_root_t*)malloc(sizeof(bbst_node_root_t));
-    t->is_root = is_root;
+    t->node_state = state;
     t->parent = parent;
     t->reaching_char = reaching_char;
 
@@ -38,7 +38,11 @@ trie_node_t *get_trie_node_children(const trie_node_t *t, char c) {
 }
 
 inline unsigned short int is_trie_node_root(const trie_node_t *t) {
-    return t->is_root == ROOT_ID;
+    return ROOT_ID == t->node_state && NULL == t->parent;
+}
+
+inline unsigned short int is_trie_node_final(const trie_node_t *t) {
+    return FINAL_NODE_ID == t->node_state;
 }
 
 void add_info_in_trie_node(trie_node_t *node, int phrase_id_AND, int phrase_id_OR, int phrase_id_NOT) {
