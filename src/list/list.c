@@ -4,30 +4,14 @@
 #include "list.h"
 #include "list_node.h"
 
-void list_add(list_node_t **r, char c, trie_node_t *to) {
-    list_node_t **t = r;
-    list_node_t **parent = NULL;
-
-    while (*t) {
-        parent = t;
-        if ((*t)->reach_char == c) {
-            break;
-        }
-        t = &(*t)->next;
-    }
-
-    // If t is not NULL, it means this char has been added to the list
-    if (*t != NULL) {
-        return;
-    }
-    
-    *t = new_list_node(c, to);
-
-    // If parent is NULL, this is the first node in list
-    if (parent == NULL) {
+void list_add(list_node_t **r, void *val) {
+    list_node_t *entry = new_list_node(val);
+    entry->next = NULL;
+    if (NULL != *r) {
+        entry->next = *r;
         return;
     }
 
-    (*parent)->next = *t;
+    *r = entry;
 }
 
