@@ -4,8 +4,7 @@
 
 #define WORD_CC word[word_idx]
 
-#include "../bbst/bbst.h"
-#include "../list/list.h"
+#include "../child_list/child_list.h"
 #include "../queue/queue.h"
 #include "trie_node.h"
 #include "trie_utils.h"
@@ -20,17 +19,18 @@ void trie_insert(trie_node_t *root, char *word) {
         temp = get_trie_node_children(current, WORD_CC);
         if (temp == NULL) {
             temp = new_trie_node(WORD_CC, current, 0);
-            list_add(&current->children[hash_char(WORD_CC)], WORD_CC, temp);
+            child_list_add(&current->children[hash_char(WORD_CC)], WORD_CC, temp);
         }
         current = temp;
     }
-    add_info_in_trie_node(current, 0, 0, 0);
+
+    current->node_state = FINAL_NODE_ID;
 }
 
 void trie_compile(trie_node_t *root) {
     trie_node_t *current = root;
     trie_node_t *parent_fail = NULL;
-    list_node_t *kid = NULL;
+    child_list_node_t *kid = NULL;
     queue_t *nodes = new_queue();
     int kid_idx;
 
