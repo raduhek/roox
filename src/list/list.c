@@ -6,12 +6,7 @@
 
 void list_add(list_node_t **r, void *val) {
     list_node_t *entry = new_list_node(val);
-    entry->next = NULL;
-    if (NULL != *r) {
-        entry->next = *r;
-        return;
-    }
-
+    entry->next = *r;
     *r = entry;
 }
 
