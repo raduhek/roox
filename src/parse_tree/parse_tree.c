@@ -7,7 +7,7 @@
 #include "parse_tree.h"
 #include "utils.h"
 
-parse_tree_t *new_parse_tree (void *val, parse_tree_t *left, parse_tree_t *right, short int is_operator) {
+parse_tree_t *new_parse_tree (char val, parse_tree_t *left, parse_tree_t *right, short int is_operator) {
     parse_tree_t *t = (parse_tree_t*) malloc (sizeof(parse_tree_t));
 
     t->val = val;
@@ -27,7 +27,7 @@ void set_parse_tree_side (parse_tree_t *node, int side) {
     node->side = side;
 }
 
-void set_parse_tree_parent (parse_tree_t *node, const parse_tree_t *parent) {
+void set_parse_tree_parent (parse_tree_t *node, parse_tree_t *parent) {
     node->parent = parent;
 }
 
@@ -39,7 +39,10 @@ void set_parse_tree_parent (parse_tree_t *node, const parse_tree_t *parent) {
  * Both arguments will be altered after this function returns:
  *  - the stack will be empty
  */
-parse_tree_t *construct_tree(char *str, stack_t *brackets) {
+parse_tree_t *construct_tree(char *str, 
+                                stack_t *brackets,
+                                void (*callback)(struct trie_node_struct *root, const char *s, void *data),
+                                struct trie_node_struct *trie_root) {
     // root will be returned
     parse_tree_t *root;
 
@@ -89,14 +92,16 @@ parse_tree_t *construct_tree(char *str, stack_t *brackets) {
                         left = (parse_tree_t*) stack_pop(children_stack);
                     } else {
                         unencode_string(token);
-                        left = new_parse_tree((void *)token, NULL, NULL, 0);
+                        // XXX: Handle token
+                        left = new_parse_tree('_', NULL, NULL, 0);
                     }
-                    root = new_parse_tree((void *)'~', left, NULL, 1);
+                    root = new_parse_tree('~', left, NULL, 1);
                     set_parse_tree_side(left, PARSE_TREE_LEFT);
                     set_parse_tree_parent(left, root);
                 } else {
                     unencode_string(token);
-                    root = new_parse_tree((void *)token, NULL, NULL, 0);
+                    // XXX: Handle token
+                    root = new_parse_tree('_', NULL, NULL, 0);
                 }
 
                 stack_push(children_stack, (void*)root);
@@ -112,9 +117,10 @@ parse_tree_t *construct_tree(char *str, stack_t *brackets) {
                     } else {
                         token = string_copy(str, current_pair->start + 2, current_pair->operator_position - 1);
                         unencode_string(token);
-                        left = new_parse_tree((void *) token, NULL, NULL, 0);
+                        // XXX: Handle token
+                        left = new_parse_tree('_', NULL, NULL, 0);
                     }
-                    root = new_parse_tree((void*) '~', left, NULL, 1);
+                    root = new_parse_tree('~', left, NULL, 1);
                     set_parse_tree_side(left, PARSE_TREE_LEFT);
                     set_parse_tree_parent(left, root);
                     left = root;
@@ -125,7 +131,8 @@ parse_tree_t *construct_tree(char *str, stack_t *brackets) {
                     } else {
                         token = string_copy(str, current_pair->start + 1, current_pair->operator_position - 1);
                         unencode_string(token);
-                        left = new_parse_tree((void *) token, NULL, NULL, 0);
+                        // XXX: Handle token
+                        left = new_parse_tree('_', NULL, NULL, 0);
                     }
                 }
 
@@ -137,9 +144,10 @@ parse_tree_t *construct_tree(char *str, stack_t *brackets) {
                         right = (parse_tree_t*) stack_pop(children_stack);
                     } else {
                         token = string_copy(str, current_pair->operator_position + 2, current_pair->end - 1);
-                        right = new_parse_tree((void *) token, NULL, NULL, 0);
+                        // XXX: Handle token
+                        right = new_parse_tree('_', NULL, NULL, 0);
                     }
-                    root = new_parse_tree((void*) '~', right, NULL, 1);
+                    root = new_parse_tree('~', right, NULL, 1);
                     set_parse_tree_side(right, PARSE_TREE_RIGHT);
                     set_parse_tree_parent(right, root);
                     right = root;
@@ -149,11 +157,12 @@ parse_tree_t *construct_tree(char *str, stack_t *brackets) {
                         right = (parse_tree_t*) stack_pop(children_stack);
                     } else {
                         token = string_copy(str, current_pair->operator_position + 1, current_pair->end - 1);
-                        right = new_parse_tree((void *) token, NULL, NULL, 0);
+                        // XXX: Handle token
+                        right = new_parse_tree('_', NULL, NULL, 0);
                     }
                 }
 
-                root = new_parse_tree((void*) str[current_pair->operator_position], left, right, 1);
+                root = new_parse_tree(str[current_pair->operator_position], left, right, 1);
 
                 set_parse_tree_side(left, PARSE_TREE_LEFT);
                 set_parse_tree_parent(left, root);
