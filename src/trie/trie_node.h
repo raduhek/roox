@@ -2,6 +2,7 @@
 #define ROOX_TRIE_NODE_H
 
 #include "../child_list/child_list_node.h"
+#include "../list/list_node.h"
 
 #define CHILDREN_BUCKETS 9
 #define ROOT_ID 218
@@ -16,6 +17,7 @@ typedef struct trie_node_struct {
     struct trie_node_struct *parent;
 
     int node_state;
+    list_node_t *syntax_trees;
 } trie_node_t;
 
 trie_node_t *new_trie_node(char, trie_node_t *, unsigned short int);

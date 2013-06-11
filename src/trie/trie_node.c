@@ -16,6 +16,7 @@ trie_node_t *new_trie_node(char reaching_char, trie_node_t *parent, unsigned sho
     t->parent = parent;
     t->reaching_char = reaching_char;
 
+    t->syntax_trees = NULL;
     return t;
 }
 

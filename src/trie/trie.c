@@ -5,11 +5,12 @@
 #define WORD_CC word[word_idx]
 
 #include "../child_list/child_list.h"
+#include "../list/list.h"
 #include "../queue/queue.h"
 #include "trie_node.h"
 #include "trie_utils.h"
 
-void trie_insert(trie_node_t *root, char *word) {
+void trie_insert(trie_node_t *root, char *word, void *data) {
     int word_idx = 0;
     int word_length = strlen(word);
     trie_node_t *current = root;
@@ -25,6 +26,7 @@ void trie_insert(trie_node_t *root, char *word) {
     }
 
     current->node_state = FINAL_NODE_ID;
+    list_add(&current->syntax_trees, data);
 }
 
 void trie_compile(trie_node_t *root) {
