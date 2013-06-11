@@ -7,10 +7,11 @@
 #include "parse_tree.h"
 #include "utils.h"
 
-parse_tree_t *new_parse_tree (char val, parse_tree_t *left, parse_tree_t *right, short int is_operator) {
+parse_tree_t *new_parse_tree (char val,  parse_tree_t *left, parse_tree_t *right, short int is_operator) {
     parse_tree_t *t = (parse_tree_t*) malloc (sizeof(parse_tree_t));
 
     t->val = val;
+    t->UDID = NULL;
     t->left = left;
     t->right = right;
     t->is_operator = is_operator;
@@ -43,7 +44,8 @@ void set_parse_tree_parent (parse_tree_t *node, parse_tree_t *parent) {
 parse_tree_t *construct_tree(char *str, 
                                 stack_t *brackets,
                                 void (*callback)(struct trie_node_struct *root, const char *s, void *data),
-                                struct trie_node_struct *trie_root) {
+                                struct trie_node_struct *trie_root,
+                                char *UDID) {
     // root will be returned
     parse_tree_t *root;
 
@@ -175,7 +177,9 @@ parse_tree_t *construct_tree(char *str,
             }
         }
     }
-    return (parse_tree_t*)stack_pop(children_stack);
+    root = (parse_tree_t*) stack_pop(children_stack);
+    root->UDID = UDID;
+    return root;
 }
 
 void validate_tree(parse_tree_t *node, void (*callback)()) {

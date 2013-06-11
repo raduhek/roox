@@ -13,6 +13,7 @@ struct trie_node_struct;
  */
 typedef struct parse_tree_struct {
     char val;
+    char *UDID;
     
     struct parse_tree_struct *parent;
     struct parse_tree_struct *left;
@@ -29,7 +30,7 @@ typedef struct parse_tree_struct {
 parse_tree_t *new_parse_tree (char, parse_tree_t *, parse_tree_t *, short int);
 void set_parse_tree_side (parse_tree_t *, int);
 void set_parse_tree_parent (parse_tree_t *, parse_tree_t *);
-parse_tree_t *construct_tree (char *, stack_t *, void (*)(struct trie_node_struct *, const char *, void *), struct trie_node_struct *); 
+parse_tree_t *construct_tree (char *, stack_t *, void (*)(struct trie_node_struct *, const char *, void *), struct trie_node_struct *, char *);
 void validate_tree(parse_tree_t *, void (*c)());
 
 #endif
