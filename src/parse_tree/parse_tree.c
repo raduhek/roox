@@ -211,7 +211,7 @@ void validate_tree(parse_tree_t *node, void (*callback)()) {
 
         // We matched it :)
         if (NULL == t->parent) {
-            callback();
+            callback(t->UDID);
             return;
         } else {
             t->parent->truth_value |= t->side;
