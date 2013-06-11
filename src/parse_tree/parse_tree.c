@@ -16,12 +16,13 @@ parse_tree_t *new_parse_tree (char val, parse_tree_t *left, parse_tree_t *right,
     t->is_operator = is_operator;
     t->side = 0;
     t->parent = NULL;
+    t->truth_value = 0;
 
     return t;
 }
 
 void set_parse_tree_side (parse_tree_t *node, int side) {
-    if (side != 1 || side != 2) {
+    if (side != 1 && side != 2) {
         side = 0;
     }
     node->side = side;
@@ -175,5 +176,43 @@ parse_tree_t *construct_tree(char *str,
         }
     }
     return (parse_tree_t*)stack_pop(children_stack);
+}
+
+void validate_tree(parse_tree_t *node, void (*callback)()) {
+    parse_tree_t *t = node;
+    short int last_tv = 1;
+
+    while (t) {
+        switch (t->val) {
+            case '|':
+                last_tv = t->truth_value != 0 ? 1: 0;
+                break;
+            case '&':
+                last_tv = t->truth_value == 3 ? 1: 0;
+                break;
+            case '~':
+                last_tv = 1 - last_tv;
+                break;
+            default:
+                break;
+        }
+
+        // If the current node is FALSE
+        // we can continue only if parent is ~
+        if (last_tv == 0) {
+            if (NULL == t->parent || t->parent->val != '~') {
+                return;
+            }
+        }
+
+        // We matched it :)
+        if (NULL == t->parent) {
+            callback();
+            return;
+        } else {
+            t->parent->truth_value |= t->side;
+            t = t->parent;
+        }
+    }
 }
 
