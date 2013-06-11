@@ -220,3 +220,12 @@ void validate_tree(parse_tree_t *node, void (*callback)()) {
     }
 }
 
+void reset_parse_tree(parse_tree_t *r) {
+    if (r == NULL) {
+        return;
+    }
+    r->truth_value = 0;
+    reset_parse_tree(r->left);
+    reset_parse_tree(r->right);
+}
+
