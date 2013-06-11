@@ -92,16 +92,17 @@ parse_tree_t *construct_tree(char *str,
                         left = (parse_tree_t*) stack_pop(children_stack);
                     } else {
                         unencode_string(token);
-                        // XXX: Handle token
                         left = new_parse_tree('_', NULL, NULL, 0);
+                        callback(trie_root, token, (void *) left);
                     }
+
                     root = new_parse_tree('~', left, NULL, 1);
                     set_parse_tree_side(left, PARSE_TREE_LEFT);
                     set_parse_tree_parent(left, root);
                 } else {
                     unencode_string(token);
-                    // XXX: Handle token
                     root = new_parse_tree('_', NULL, NULL, 0);
+                    callback(trie_root, token, (void *) root);
                 }
 
                 stack_push(children_stack, (void*)root);
@@ -117,8 +118,8 @@ parse_tree_t *construct_tree(char *str,
                     } else {
                         token = string_copy(str, current_pair->start + 2, current_pair->operator_position - 1);
                         unencode_string(token);
-                        // XXX: Handle token
                         left = new_parse_tree('_', NULL, NULL, 0);
+                        callback(trie_root, token, (void *) left);
                     }
                     root = new_parse_tree('~', left, NULL, 1);
                     set_parse_tree_side(left, PARSE_TREE_LEFT);
@@ -131,8 +132,8 @@ parse_tree_t *construct_tree(char *str,
                     } else {
                         token = string_copy(str, current_pair->start + 1, current_pair->operator_position - 1);
                         unencode_string(token);
-                        // XXX: Handle token
                         left = new_parse_tree('_', NULL, NULL, 0);
+                        callback(trie_root, token, (void *) left);
                     }
                 }
 
@@ -144,8 +145,8 @@ parse_tree_t *construct_tree(char *str,
                         right = (parse_tree_t*) stack_pop(children_stack);
                     } else {
                         token = string_copy(str, current_pair->operator_position + 2, current_pair->end - 1);
-                        // XXX: Handle token
                         right = new_parse_tree('_', NULL, NULL, 0);
+                        callback(trie_root, token, (void *) right);
                     }
                     root = new_parse_tree('~', right, NULL, 1);
                     set_parse_tree_side(right, PARSE_TREE_RIGHT);
@@ -157,8 +158,8 @@ parse_tree_t *construct_tree(char *str,
                         right = (parse_tree_t*) stack_pop(children_stack);
                     } else {
                         token = string_copy(str, current_pair->operator_position + 1, current_pair->end - 1);
-                        // XXX: Handle token
                         right = new_parse_tree('_', NULL, NULL, 0);
+                        callback(trie_root, token, (void *) right);
                     }
                 }
 
