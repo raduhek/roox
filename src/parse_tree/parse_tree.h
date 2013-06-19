@@ -35,6 +35,7 @@ void set_parse_tree_parent (parse_tree_t *, parse_tree_t *);
 parse_tree_t *construct_tree (char *, stack_t *, void (*)(struct trie_node_struct *, const char *, void *), struct trie_node_struct *, char *);
 void validate_tree(parse_tree_t *, short int);
 void reset_parse_tree(parse_tree_t *r);
+int operator_truth_value(parse_tree_t *, int, int);
 
 #endif
 
