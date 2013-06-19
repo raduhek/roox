@@ -18,7 +18,13 @@ parse_tree_t *new_parse_tree (char val,  parse_tree_t *left, parse_tree_t *right
     t->side = 0;
     t->parent = NULL;
     t->truth_value = 0;
+    t->initial_truth_value = 0;
+    t->modifier = -1;
 
+    if (val == '~') {
+        t->truth_value = 1 - left->truth_value;
+        t->initial_truth_value = t->truth_value;
+    }
     return t;
 }
 
@@ -31,6 +37,28 @@ void set_parse_tree_side (parse_tree_t *node, int side) {
 
 void set_parse_tree_parent (parse_tree_t *node, parse_tree_t *parent) {
     node->parent = parent;
+}
+
+int operator_truth_value(parse_tree_t *t, int switcher, int ws) {
+    int truth_value;
+
+    if (ws == 0) {
+        truth_value = t->truth_value;
+    } else {
+        if (t->modifier == switcher) {
+            truth_value = t->truth_value;
+        } else {
+            truth_value = t->initial_truth_value;
+        }
+    }
+
+    if (t->val == '&') {
+        return (truth_value == 3) ? 1: 0;
+    }
+    if (t->val == '|') {
+        return (truth_value | 0) ? 1: 0;
+    }
+    return truth_value ? 1: 0;
 }
 
 /*
@@ -79,6 +107,9 @@ parse_tree_t *construct_tree(char *str,
             /*
              * We have a few cases to handle here
              */
+            /*
+                LEFT and RIGHT children
+            */
             left = NULL;
             right = NULL;
             str[current_pair->start] = '[';
@@ -95,7 +126,7 @@ parse_tree_t *construct_tree(char *str,
                         left = (parse_tree_t*) stack_pop(children_stack);
                     } else {
                         unencode_string(token);
-                        left = new_parse_tree('_', NULL, NULL, 0);
+                        left = new_parse_tree(token[0], NULL, NULL, 0);
                         callback(trie_root, token, (void *) left);
                     }
 
@@ -104,7 +135,7 @@ parse_tree_t *construct_tree(char *str,
                     set_parse_tree_parent(left, root);
                 } else {
                     unencode_string(token);
-                    root = new_parse_tree('_', NULL, NULL, 0);
+                    root = new_parse_tree(token[0], NULL, NULL, 0);
                     callback(trie_root, token, (void *) root);
                 }
 
@@ -121,7 +152,7 @@ parse_tree_t *construct_tree(char *str,
                     } else {
                         token = string_copy(str, current_pair->start + 2, current_pair->operator_position - 1);
                         unencode_string(token);
-                        left = new_parse_tree('_', NULL, NULL, 0);
+                        left = new_parse_tree(token[0], NULL, NULL, 0);
                         callback(trie_root, token, (void *) left);
                     }
                     root = new_parse_tree('~', left, NULL, 1);
@@ -135,7 +166,7 @@ parse_tree_t *construct_tree(char *str,
                     } else {
                         token = string_copy(str, current_pair->start + 1, current_pair->operator_position - 1);
                         unencode_string(token);
-                        left = new_parse_tree('_', NULL, NULL, 0);
+                        left = new_parse_tree(token[0], NULL, NULL, 0);
                         callback(trie_root, token, (void *) left);
                     }
                 }
@@ -148,7 +179,7 @@ parse_tree_t *construct_tree(char *str,
                         right = (parse_tree_t*) stack_pop(children_stack);
                     } else {
                         token = string_copy(str, current_pair->operator_position + 2, current_pair->end - 1);
-                        right = new_parse_tree('_', NULL, NULL, 0);
+                        right = new_parse_tree(token[0], NULL, NULL, 0);
                         callback(trie_root, token, (void *) right);
                     }
                     root = new_parse_tree('~', right, NULL, 1);
@@ -161,12 +192,15 @@ parse_tree_t *construct_tree(char *str,
                         right = (parse_tree_t*) stack_pop(children_stack);
                     } else {
                         token = string_copy(str, current_pair->operator_position + 1, current_pair->end - 1);
-                        right = new_parse_tree('_', NULL, NULL, 0);
+                        right = new_parse_tree(token[0], NULL, NULL, 0);
                         callback(trie_root, token, (void *) right);
                     }
                 }
 
                 root = new_parse_tree(str[current_pair->operator_position], left, right, 1);
+
+                root->truth_value = operator_truth_value(left, 0, 0) * 2 + operator_truth_value(right, 0, 0) * 1;
+                root->initial_truth_value = root->truth_value;
 
                 set_parse_tree_side(left, PARSE_TREE_LEFT);
                 set_parse_tree_parent(left, root);
@@ -182,50 +216,26 @@ parse_tree_t *construct_tree(char *str,
     return root;
 }
 
-void validate_tree(parse_tree_t *node, void (*callback)()) {
+void validate_tree(parse_tree_t *node, short int switcher) {
     parse_tree_t *t = node;
-    short int last_tv = 1;
 
     while (t) {
+        t->modifier = switcher;
         switch (t->val) {
             case '|':
-                last_tv = t->truth_value != 0 ? 1: 0;
-                break;
             case '&':
-                last_tv = t->truth_value == 3 ? 1: 0;
+                t->truth_value = operator_truth_value(t->left, switcher, 1) * 2 +
+                                operator_truth_value(t->right, switcher, 1) * 1;
                 break;
             case '~':
-                last_tv = 1 - last_tv;
+                t->truth_value = 1 - operator_truth_value(t->left, switcher, 1);
                 break;
             default:
+                t->truth_value = 1;
                 break;
         }
 
-        // If the current node is FALSE
-        // we can continue only if parent is ~
-        if (last_tv == 0) {
-            if (NULL == t->parent || t->parent->val != '~') {
-                return;
-            }
-        }
-
-        // We matched it :)
-        if (NULL == t->parent) {
-            callback(t->UDID);
-            return;
-        } else {
-            t->parent->truth_value |= t->side;
-            t = t->parent;
-        }
+        t = t->parent;
     }
-}
-
-void reset_parse_tree(parse_tree_t *r) {
-    if (r == NULL) {
-        return;
-    }
-    r->truth_value = 0;
-    reset_parse_tree(r->left);
-    reset_parse_tree(r->right);
 }
 

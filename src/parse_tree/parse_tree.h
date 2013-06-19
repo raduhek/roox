@@ -24,14 +24,16 @@ typedef struct parse_tree_struct {
     short int side;
 
     short int is_operator;
+    short int initial_truth_value;
     short int truth_value;
+    short int modifier;
 } parse_tree_t;
 
 parse_tree_t *new_parse_tree (char, parse_tree_t *, parse_tree_t *, short int);
 void set_parse_tree_side (parse_tree_t *, int);
 void set_parse_tree_parent (parse_tree_t *, parse_tree_t *);
 parse_tree_t *construct_tree (char *, stack_t *, void (*)(struct trie_node_struct *, const char *, void *), struct trie_node_struct *, char *);
-void validate_tree(parse_tree_t *, void (*c)());
+void validate_tree(parse_tree_t *, short int);
 void reset_parse_tree(parse_tree_t *r);
 
 #endif
