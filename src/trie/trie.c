@@ -73,7 +73,10 @@ void trie_compile(trie_node_t *root) {
     return;
 }
 
-void trie_match(const trie_node_t *root, char *phrase, void (*callback)()) {
+void trie_match(        const trie_node_t *root,
+                        char *phrase, 
+                        short int switcher,
+                        void (*cb)()) {
     const trie_node_t *current = root;
     const trie_node_t *temp;
     list_node_t *st;
@@ -99,7 +102,7 @@ void trie_match(const trie_node_t *root, char *phrase, void (*callback)()) {
             if (1 == is_trie_node_final(temp)) {
                 st = temp->syntax_trees;
                 while (NULL != st) {
-                    validate_tree((struct parse_tree_struct*) st->value, callback);
+                    cb((struct parse_tree_struct*) st->value, switcher);
                     st = st->next;
                 }
             }
