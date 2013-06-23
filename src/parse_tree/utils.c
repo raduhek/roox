@@ -38,9 +38,9 @@ char *string_copy(const char *s, int start, int end) {
  * or 1 otherwise
  *
  */
-int extract_parentheses(const char *str, stack_t *pairs_stack) {
+int extract_parentheses(const char *str, stack_rt *pairs_stack) {
     // Used for internal processing
-    stack_t *temp_stack = new_stack();
+    stack_rt *temp_stack = new_stack();
 
     // Used for handling pairs of parentheses
     pair_t *pair;

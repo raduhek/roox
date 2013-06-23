@@ -222,7 +222,7 @@ int check_boolean_operators(const char *str) {
     return 1;
 }
 
-void remove_duplicate_parentheses(char *phrase, stack_t *phrase_parentheses_stack) {
+void remove_duplicate_parentheses(char *phrase, stack_rt *phrase_parentheses_stack) {
     pair_t *pair, *last;
     int start, end;
 

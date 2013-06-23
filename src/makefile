@@ -18,8 +18,10 @@ all:
 	$(CC) $(CCFLAGS) parse_tree/parse_tree.c
 	$(CC) $(CCFLAGS) parse_tree/utils.c
 	$(CC) $(CCFLAGS) sanitizer/sanitizer.c
+	$(CC) $(CCFLAGS) jsmn/jsmn.c
+	$(CC) $(CCFLAGS) http/http.c
 	$(CC) $(CCFLAGS) main.c
-	$(CC) -o main main.o list.o list_node.o child_list.o child_list_node.o queue_node.o queue.o trie_utils.o trie_node.o trie.o sanitizer.o parse_tree.o utils.o stack_node.o stack.o pair.o
+	$(CC) -o main main.o list.o list_node.o child_list.o child_list_node.o queue_node.o queue.o trie_utils.o trie_node.o trie.o sanitizer.o parse_tree.o utils.o stack_node.o stack.o pair.o jsmn.o http.o
 
 clean_o:
 	rm -rf *.o

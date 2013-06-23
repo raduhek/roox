@@ -4,7 +4,7 @@
 #include "stack_node.h"
 #include "stack.h"
 
-void stack_push(stack_t *q, void *val) {
+void stack_push(stack_rt *q, void *val) {
     stack_node_t *temp;
     if (q->head == NULL) {
         q->head = new_stack_node(val, NULL);
@@ -14,7 +14,7 @@ void stack_push(stack_t *q, void *val) {
     }
 }
 
-void *stack_pop(stack_t *q) {
+void *stack_pop(stack_rt *q) {
     stack_node_t *temp;
     void *val;
     if (q->head == NULL) {
@@ -29,7 +29,7 @@ void *stack_pop(stack_t *q) {
 
 }
 
-int count(stack_t *q) {
+int count(stack_rt *q) {
     stack_node_t *temp = q->head;
     int i = 0;
     while (temp) {
@@ -39,7 +39,7 @@ int count(stack_t *q) {
     return i;
 }
 
-void empty_stack(stack_t *q) {
+void empty_stack(stack_rt *q) {
     stack_node_t *t = q->head;
     while (t) {
         q->head = t->prev;
@@ -48,15 +48,15 @@ void empty_stack(stack_t *q) {
     }
 }
 
-void *stack_peak(stack_t *q) {
+void *stack_peak(stack_rt *q) {
     if (q->head == NULL) {
         return NULL;
     }
     return q->head->val;
 }
 
-stack_t *new_stack() {
-    stack_t *t = (stack_t*)malloc(sizeof(stack_t));
+stack_rt *new_stack() {
+    stack_rt *t = (stack_rt*)malloc(sizeof(stack_rt));
     t->head = NULL;
     return t;
 }

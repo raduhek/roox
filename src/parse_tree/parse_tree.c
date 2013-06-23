@@ -70,7 +70,7 @@ int operator_truth_value(parse_tree_t *t, int switcher, int ws) {
  *  - the stack will be empty
  */
 parse_tree_t *construct_tree(char *str, 
-                                stack_t *brackets,
+                                stack_rt *brackets,
                                 void (*callback)(struct trie_node_struct *root, const char *s, void *data),
                                 struct trie_node_struct *trie_root,
                                 char *UDID) {
@@ -85,10 +85,10 @@ parse_tree_t *construct_tree(char *str,
 
     // This is used to put the parentheses pair in it from the brackets stack
     // and then are popped and processed
-    stack_t *inner_pair_stack = new_stack();
+    stack_rt *inner_pair_stack = new_stack();
 
     // This stack is used to construct the tree
-    stack_t *children_stack = new_stack();
+    stack_rt *children_stack = new_stack();
     
     char *token;
 

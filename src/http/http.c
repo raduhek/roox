@@ -38,73 +38,22 @@
 #include <netdb.h>
 #include <signal.h>
 #include <fcntl.h>
+
 #include "defines.h"
 #include "http.h"
+#include "../list/list.h"
+#include "../trie/trie_node.h"
+#include "../trie/trie.h"
+#include "../stack/stack.h"
+#include "../pair/pair.h"
+#include "../parse_tree/utils.h"
+#include "../parse_tree/parse_tree.h"
+#include "../sanitizer/sanitizer.h"
 
 int listenfd, clients[CONNMAX];
 
-void error(char *);
-void startServer(char *);
 void respond(int);
 int parse_headers(char *header, int *cl);
-
-int main(int argc, char* argv[])
-{
-    int i; // index variable name used by Herodot and others... old
-
-    struct sockaddr_in clientaddr;
-    socklen_t addrlen;
-
-    char arg_letter;    
-    
-    char PORT[6] = "5004";
-    int slot=0;
-
-    //Parsing the command line arguments
-    while ((arg_letter = getopt (argc, argv, "p:")) != -1)
-        switch (arg_letter)
-        {
-            case 'p':
-                strcpy(PORT,optarg);
-                break;
-            case '?':
-                fprintf(stderr,"Wrong arguments given!!!\n");
-                exit(1);
-            default:
-                exit(1);
-        }
-    
-    for (i = CONNMAX - 1; i >= 0; --i) {
-        clients[i]=-1;
-    }
-
-    startServer(PORT);
-
-    // ACCEPT connections
-    while (1)
-    {
-        addrlen = sizeof(clientaddr);
-        clients[slot] = accept (listenfd, (struct sockaddr *) &clientaddr, &addrlen);
-
-        if (clients[slot]<0)
-            error ("accept() error");
-        else
-        {
-            if ( fork()==0 )
-            {
-                respond(slot);
-                exit(0);
-            }
-        }
-
-        // Find next free slot
-        while (clients[slot] != -1) {
-            slot = (slot++) % CONNMAX;
-        }
-    }
-
-    return 0;
-}
 
 //start server
 void start_server(char *port)

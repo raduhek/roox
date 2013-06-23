@@ -1,52 +1,85 @@
 #include <stdio.h>
 
-#include "list/list.h"
-#include "trie/trie_node.h"
-#include "trie/trie.h"
-#include "stack/stack.h"
-#include "pair/pair.h"
-#include "parse_tree/utils.h"
-#include "parse_tree/parse_tree.h"
-#include "sanitizer/sanitizer.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <signal.h>
+#include <fcntl.h>
+
+#include "http/defines.h"
+#include "http/http.h"
+
+int main(int argc, char* argv[])
+{
+    int i; // index variable name used by Herodot and others... old
+
+    struct sockaddr_in clientaddr;
+    socklen_t addrlen;
+
+    char arg_letter;    
+    
+    char PORT[6] = "5004";
+    int slot = 0;
+
+    //Parsing the command line arguments
+    while ((arg_letter = getopt (argc, argv, "p:")) != -1)
+        switch (arg_letter)
+        {
+            case 'p':
+                strcpy(PORT,optarg);
+                break;
+            case '?':
+                fprintf(stderr,"Wrong arguments given!!!\n");
+                exit(1);
+            default:
+                exit(1);
+        }
+    
+    for (i = CONNMAX - 1; i >= 0; --i) {
+        clients[i]=-1;
+    }
+
+    start_server(PORT);
+
+    // ACCEPT connections
+    while (1)
+    {
+        addrlen = sizeof(clientaddr);
+        clients[slot] = accept (listenfd, (struct sockaddr *) &clientaddr, &addrlen);
+
+        if (clients[slot]<0)
+            perror ("accept() error");
+        else
+        {
+            if ( fork()==0 )
+            {
+                // Respond pretty much deals with everything that needs to be done
+                // for any endpoint
+                respond(slot);
+                exit(0);
+            }
+        }
+
+        // Find next free slot
+        while (clients[slot] != -1) {
+            slot = (slot+1) % CONNMAX;
+        }
+    }
+
+    return 0;
+}
 
 void print_found(char *text, char *id) {
     printf("FOUND: %s -> %s", text, id);
 }
 
-void read_file(char **buffer, char *file_name) {
-    long fsize;
-    FILE *fin;
-    free(*buffer);
-    fin = fopen(file_name, "r");
-    // If file could not be opened, buffer will be null
-    if (! fin) {
-        return;
-    }
-
-    // Get file size
-    fseek(fin, 0L, SEEK_END);
-    fsize = ftell(fin);
-    rewind(fin);
-
-    *buffer = (char*) malloc(fsize * sizeof(char));
-
-    if (*buffer == NULL) {
-        printf("WARNING: file %s too big: %ld\n", file_name, fsize);
-        fclose(fin);
-        return;
-    }
-
-    if (1 != fread(*buffer, fsize, 1, fin)) {
-        printf("WARNING: could not read contents of %s\n", file_name);
-        free(*buffer);
-        fclose(fin);
-        return;
-    }
-
-    return;
-}
-
-void print_tree(parse_tree_t *t, int l) {
+/*void print_tree(parse_tree_t *t, int l) {
 int i;
     if (t == NULL) {
         return;
@@ -57,11 +90,9 @@ int i;
     }
     printf ("%c (%d)\n", t->val, t->truth_value);
     print_tree(t->left, l+1);
-}
-
-int main(int argc, char **argv) {
-    // @line holds a file entry
-    char line[2048];
+}*/
+/*
+int main2(int argc, char **argv) {
     // @udid is used to identify a formula
     char udid_entry[32];
     char *udid;
@@ -203,4 +234,4 @@ int main(int argc, char **argv) {
 
     return 0;
 }
-
+*/
