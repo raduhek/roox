@@ -104,13 +104,14 @@ void close_stuff(int n) {
  * This is quite a big function, that needs to be broken
  *
  */
-void respond(int n, endpoint_t *endpoints) {
+void respond(int n, endpoint_t *endpoints, int e_count) {
     char request_method[10];
     char request_path[256];
     char request_http_version[10];
 
     char *mesg; 
     char *recieved_data;
+    char *phrase_id, *phrase;
     int rcvd;
     int sscanf_ret;
     int content_length = -1;
@@ -203,10 +204,34 @@ void respond(int n, endpoint_t *endpoints) {
 
     for (i = 0; i < 5; ++i) {
         if (tokens[i].start == 0) continue;
-        printf("TOK[%d]: %s\n", i, get_token_string(recieved_data, tokens[i]));
+        if (strcmp(get_token_string(recieved_data, tokens[i]), "id")) {
+            jsmn_id_phrase |= 1;
+            phrase_id = get_token_string(recieved_data, tokens[i++]);
+        }
+        if (strcmp(get_token_string(recieved_data, tokens[i]), "phrase")) {
+            jsmn_id_phrase |= 3;
+            phrase = get_token_string(recieved_data, tokens[i++]);
+        }
     }
 
-    write(clients[n], HTTP_OK, HTTP_OK_L);
+    // Maybe specify what wasn't sent ??
+    if (3 != (3 & jsmn_id_phrase)) {
+        printf("SOMETHING NOT SENT\n");
+        write(clients[n], HTTP_BR, HTTP_BR_L);
+        close_stuff(n);
+        return;
+    }
+
+    // We're ok now :)
+    for (i = 0; i < e_count; ++i) {
+        // We've GOT ID :D
+        if (strcmp(request_path, endpoints[i].uri) == 0) {
+            endpoints[i].callback(phrase_id, phrase);
+            write(clients[n], HTTP_OK, HTTP_OK_L);
+            close_stuff(n);
+        }
+    }
+    write(clients[n], HTTP_BR, HTTP_BR_L);
 
     close_stuff(n);
 

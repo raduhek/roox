@@ -8,7 +8,7 @@ extern int clients[CONNMAX];
 extern int listenfd;
 
 void start_server(char *);
-void respond(int, endpoint_t *);
+void respond(int, endpoint_t *, int);
 
 #endif
 
