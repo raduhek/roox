@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -7,10 +8,19 @@
 #include "../child_list/child_list.h"
 #include "../list/list.h"
 #include "../queue/queue.h"
+#include "trie.h"
 #include "trie_node.h"
 #include "trie_utils.h"
 
-void trie_insert(trie_node_t *root, char *word, void *data) {
+struct parse_tree_struct;
+
+extern void validate_tree();
+extern int operator_truth_value();
+extern struct trie_node_struct *trie_root;
+extern int text_match_index;
+extern list_node_t *syntax_trees;
+
+void trie_insert(trie_node_t *root, const char *word, void *data) {
     int word_idx = 0;
     int word_length = strlen(word);
     trie_node_t *current = root;
@@ -73,24 +83,29 @@ void trie_compile(trie_node_t *root) {
     return;
 }
 
-void trie_match(        const trie_node_t *root,
+/*void trie_match(        char *uid,
+                        const trie_node_t *root,
                         char *phrase, 
                         short int switcher,
-                        void (*cb)()) {
-    const trie_node_t *current = root;
+                        void (*cb)()) {*/
+//void trie_match(char *uid, ...) {
+int trie_match(char *udid, char *phrase) {
+
+    const trie_node_t *current = trie_root;
     const trie_node_t *temp;
     list_node_t *st;
+
     while (*phrase) {
         while((temp = get_trie_node_children(current, *phrase)) == NULL && 
-                current != root) {
+                current != trie_root) {
             current = current->fail;
         }
 
         if (1 == is_trie_node_root(current)) {
-            current = get_trie_node_children(root, *phrase);
+            current = get_trie_node_children(trie_root, *phrase);
 
             if (current == NULL) {
-                current = root;
+                current = trie_root;
             }
 
             temp = current;
@@ -98,11 +113,12 @@ void trie_match(        const trie_node_t *root,
             current = temp;
         }
     
-        while (temp != root) {
+        while (temp != trie_root) {
             if (1 == is_trie_node_final(temp)) {
                 st = temp->syntax_trees;
                 while (NULL != st) {
-                    cb((struct parse_tree_struct*) st->value, switcher);
+                    printf ("validating\n");
+                    validate_tree((struct parse_tree_struct*) st->value, text_match_index);
                     st = st->next;
                 }
             }
@@ -111,5 +127,22 @@ void trie_match(        const trie_node_t *root,
         
         phrase++;
     }
+
+    st = syntax_trees;
+    printf ("matching\n");
+    if (syntax_trees == NULL) {
+        printf("nothing added\n");
+    }
+    while (st) {
+        printf ("in while\n");
+        struct parse_tree_struct *t = (struct parse_tree_struct *) st->value;
+        if(operator_truth_value(t->val, text_match_index, 1)) {
+            printf("Found: %s - %s\n", udid, "TIHS");
+        }
+        t->truth_value = t->initial_truth_value;
+        st = st->next;
+    }
+    printf ("returning from trie_match\n");
+    return 0;
 }
 

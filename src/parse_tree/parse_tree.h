@@ -29,13 +29,15 @@ typedef struct parse_tree_struct {
     short int modifier;
 } parse_tree_t;
 
-parse_tree_t *new_parse_tree (char, parse_tree_t *, parse_tree_t *, short int);
+/*parse_tree_t *new_parse_tree (char, parse_tree_t *, parse_tree_t *, short int);
 void set_parse_tree_side (parse_tree_t *, int);
 void set_parse_tree_parent (parse_tree_t *, parse_tree_t *);
 parse_tree_t *construct_tree (char *, stack_rt *, void (*)(struct trie_node_struct *, const char *, void *), struct trie_node_struct *, char *);
 void validate_tree(parse_tree_t *, short int);
 void reset_parse_tree(parse_tree_t *r);
-int operator_truth_value(parse_tree_t *, int, int);
+int operator_truth_value(parse_tree_t *, int, int);*/
+
+int insert_phrase(char *uid, char *phrase);
 
 #endif
 

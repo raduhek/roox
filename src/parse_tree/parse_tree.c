@@ -2,10 +2,16 @@
 #include "stdio.h"
 
 #include "../stack/stack.h"
+#include "../list/list.h"
 #include "../sanitizer/sanitizer.h"
 #include "../pair/pair.h"
 #include "parse_tree.h"
 #include "utils.h"
+
+extern struct stack_struct *phrase_parentheses_stack;
+extern struct trie_node_struct *trie_root;
+extern list_node_t *syntax_trees;
+extern void trie_insert(struct trie_node_struct *, const char *, void *);
 
 parse_tree_t *new_parse_tree (char val,  parse_tree_t *left, parse_tree_t *right, short int is_operator) {
     parse_tree_t *t = (parse_tree_t*) malloc (sizeof(parse_tree_t));
@@ -216,7 +222,7 @@ parse_tree_t *construct_tree(char *str,
     return root;
 }
 
-void validate_tree(parse_tree_t *node, short int switcher) {
+void validate_tree(parse_tree_t *node, int switcher) {
     parse_tree_t *t = node;
 
     while (t) {
@@ -237,5 +243,59 @@ void validate_tree(parse_tree_t *node, short int switcher) {
 
         t = t->parent;
     }
+}
+
+int insert_phrase(char *udid, char *phrase) {
+    // @ep_ok = extract_parentheses check variable
+    // @bo_ok = boolean_operators check variable
+    int ep_ok, bo_ok;
+
+    // @pt_root is the root of a syntax tree
+    parse_tree_t *pt_root;
+
+
+    phrase = remove_whitespaces(phrase, 0);
+    remove_empty_parentheses(phrase);
+    phrase = remove_whitespaces(phrase, 0);
+    surround_with_parentheses(phrase); 
+
+    ep_ok = extract_parentheses(phrase, phrase_parentheses_stack);
+    if (0  == ep_ok) {
+        printf("WARNING: Could not extract parentheses positions\n");
+        // empty_stack(&phrase_parentheses_stack);
+        return 1;
+    }
+
+    remove_duplicate_parentheses(phrase, phrase_parentheses_stack);
+    phrase = remove_whitespaces(phrase, 1);
+
+    bo_ok = check_boolean_operators(phrase);
+    if (0 == bo_ok) {
+        printf("WARNING: Operators & or | are not binary as required\n");
+        
+        return 2;
+    }
+
+    ep_ok = extract_parentheses(phrase, phrase_parentheses_stack);
+        
+    if (0  == ep_ok) {
+        printf("WARNING: Could not extract parentheses positions\n");
+        return 3;
+    }
+
+    pt_root = construct_tree(phrase, phrase_parentheses_stack, trie_insert, trie_root, udid); 
+
+    if (pt_root == NULL) {
+        printf("ERROR: Could not construct syntax tree from:\n%s\n", phrase);
+        // This is a 500
+        return 4;
+    }
+
+    list_add(&syntax_trees, (void*) pt_root);
+    if (syntax_trees == NULL) {
+        printf("nothing added... wtf??\n");
+    }
+
+    return 0;
 }
 

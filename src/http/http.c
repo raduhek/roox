@@ -114,6 +114,7 @@ void respond(int n, endpoint_t *endpoints, int e_count) {
     char *phrase_id, *phrase;
     int rcvd;
     int sscanf_ret;
+    int callback_ret;
     int content_length = -1;
     int data_start_index;
     int i, jsmn_ret, jsmn_id_phrase = 0;
@@ -193,8 +194,8 @@ void respond(int n, endpoint_t *endpoints, int e_count) {
     }
 
     jsmn_init(&data_js); 
+    jsmn_id_phrase = 0;
     jsmn_ret = jsmn_parse(&data_js, recieved_data, tokens, 5);
-    printf("DATA:%s\n", recieved_data);
     if (JSMN_SUCCESS != jsmn_ret) {
         printf("COULD_NOT_PARSE\n");
         write(clients[n], HTTP_BR, HTTP_BR_L);
@@ -204,17 +205,22 @@ void respond(int n, endpoint_t *endpoints, int e_count) {
 
     for (i = 0; i < 5; ++i) {
         if (tokens[i].start == 0) continue;
-        if (strcmp(get_token_string(recieved_data, tokens[i]), "id")) {
+        if (0 == strcmp(get_token_string(recieved_data, tokens[i]), "id")) {
             jsmn_id_phrase |= 1;
+            printf("making 1: %d\n", jsmn_id_phrase);
             phrase_id = get_token_string(recieved_data, tokens[i++]);
         }
-        if (strcmp(get_token_string(recieved_data, tokens[i]), "phrase")) {
-            jsmn_id_phrase |= 3;
+        if (0 == strcmp(get_token_string(recieved_data, tokens[i]), "phrase")) {
+            jsmn_id_phrase |= 2;
+            printf("making 2: %d\n", jsmn_id_phrase);
             phrase = get_token_string(recieved_data, tokens[i++]);
         }
+        printf("checking: %d\n", jsmn_id_phrase);
+
     }
 
     // Maybe specify what wasn't sent ??
+    printf("JSMN: %d\n\n", jsmn_id_phrase);
     if (3 != (3 & jsmn_id_phrase)) {
         printf("SOMETHING NOT SENT\n");
         write(clients[n], HTTP_BR, HTTP_BR_L);
@@ -224,11 +230,17 @@ void respond(int n, endpoint_t *endpoints, int e_count) {
 
     // We're ok now :)
     for (i = 0; i < e_count; ++i) {
-        // We've GOT ID :D
+        // We've GOT IT :D
         if (strcmp(request_path, endpoints[i].uri) == 0) {
-            endpoints[i].callback(phrase_id, phrase);
+            printf("we got it\n");
+            callback_ret = endpoints[i].callback(phrase_id, phrase);
+            printf("we got yes: %d\n", callback_ret);
             write(clients[n], HTTP_OK, HTTP_OK_L);
+            printf("we got yes: %d\n", callback_ret);
+            //write(clients[n], endpoints[i].messages[callback_ret], strlen(endpoints[i].messages[callback_ret]));
+            //printf("cb: %s\n", endpoints[i].messages[callback_ret]);
             close_stuff(n);
+            return;
         }
     }
     write(clients[n], HTTP_BR, HTTP_BR_L);

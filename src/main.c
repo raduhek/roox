@@ -1,31 +1,62 @@
 #include <stdio.h>
-
-#include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/socket.h>
 #include <arpa/inet.h>
-#include <netdb.h>
-#include <signal.h>
-#include <fcntl.h>
 
+#include "trie/trie.h"
+#include "list/list.h"
+#include "stack/stack.h"
+#include "parse_tree/parse_tree.h"
+#include "endpoints.h"
 #include "http/defines.h"
 #include "http/http.h"
+
+endpoint_t endpoints[3];
+
+// @text_match_index is the index of current text that is match (see validate_tree)
+int text_match_index = 0;
+
+// @trie_root is the root node of the trie
+trie_node_t *trie_root; // = new_trie_node(ROOT_CHAR, NULL, ROOT_ID); 
+
+// @phrase_parentheses_stack is used for processing parentheses pairs
+struct stack_struct *phrase_parentheses_stack; // = new_stack();
+
+// @syntax_trees holds all constructed trees 
+list_node_t *syntax_trees = NULL; 
+
+void define_endpoints() {
+    endpoints[0].uri = "/add";
+    endpoints[0].callback = insert_phrase;
+    endpoints[0].messages = (char **) malloc(5 * sizeof(char *));
+    endpoints[0].messages[0] = "OK";
+    endpoints[0].messages[1] = "Could not extract parentheses";
+    endpoints[0].messages[2] = "Operators not binary";
+    endpoints[0].messages[3] = "Could not extract parentheses";
+    endpoints[0].messages[4] = "500: No syntax tree";
+
+
+    endpoints[1].uri = "/match";
+    endpoints[1].callback = trie_match;
+    endpoints[0].messages = (char **) malloc(1 * sizeof(char *));
+    endpoints[0].messages[0] = "OK";
+}
+
 
 int main(int argc, char* argv[])
 {
     int i; // index variable name used by Herodot and others... old
 
-    struct sockaddr_in clientaddr;
+    struct sockaddr clientaddr;
     socklen_t addrlen;
 
     char arg_letter;    
     
     char PORT[6] = "5004";
     int slot = 0;
+
 
     //Parsing the command line arguments
     while ((arg_letter = getopt (argc, argv, "p:")) != -1)
@@ -42,10 +73,17 @@ int main(int argc, char* argv[])
         }
     
     for (i = CONNMAX - 1; i >= 0; --i) {
-        clients[i]=-1;
+        clients[i] = -1;
     }
 
     start_server(PORT);
+    define_endpoints();
+
+    /*
+        At this point the server is up, so init global variables
+    */
+    trie_root = new_trie_node(ROOT_CHAR, NULL, ROOT_ID); 
+    phrase_parentheses_stack = new_stack();
 
     // ACCEPT connections
     while (1)
@@ -61,7 +99,7 @@ int main(int argc, char* argv[])
             {
                 // Respond pretty much deals with everything that needs to be done
                 // for any endpoint
-                respond(slot);
+                respond(slot, endpoints, 2);
                 exit(0);
             }
         }
