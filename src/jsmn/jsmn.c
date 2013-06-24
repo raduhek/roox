@@ -3,6 +3,21 @@
 #include "jsmn.h"
 
 /**
+ *  Return the string parsed tokens
+ */
+char *get_token_string(const char *s, jsmntok_t token) {
+    int i;
+    char *ret = (char *)malloc((token.end - token.start + 1) * sizeof(char));
+    ret[token.end - token.start] = '\0';
+
+    for (i = token.end - 1; i >= token.start; --i) {
+        ret[i - token.start] = s[i];
+    }
+
+    return ret;
+}
+
+/**
  * Allocates a fresh unused token from the token pull.
  */
 static jsmntok_t *jsmn_alloc_token(jsmn_parser *parser, 

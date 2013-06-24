@@ -64,4 +64,6 @@ void jsmn_init(jsmn_parser *parser);
 jsmnerr_t jsmn_parse(jsmn_parser *parser, const char *js, 
 		jsmntok_t *tokens, unsigned int num_tokens);
 
+
+char *get_token_string(const char *, jsmntok_t);
 #endif /* __JSMN_H_ */
