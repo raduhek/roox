@@ -49,10 +49,10 @@
 #include "../parse_tree/utils.h"
 #include "../parse_tree/parse_tree.h"
 #include "../sanitizer/sanitizer.h"
+#include "../jsmn/jsmn.h"
 
 int listenfd, clients[CONNMAX];
 
-void respond(int);
 int parse_headers(char *header, int *cl);
 
 //start server
@@ -104,16 +104,21 @@ void close_stuff(int n) {
  * This is quite a big function, that needs to be broken
  *
  */
-void respond(int n) {
+void respond(int n, endpoint_t *endpoints) {
     char request_method[10];
     char request_path[256];
     char request_http_version[10];
 
     char *mesg; 
-    int rcvd, fd, bytes_read;
+    char *recieved_data;
+    int rcvd;
     int sscanf_ret;
     int content_length = -1;
-    int data_start_index, i;
+    int data_start_index;
+    int i, jsmn_ret, jsmn_id_phrase = 0;
+
+    jsmn_parser data_js;
+    jsmntok_t tokens[5];
 
     mesg = (char*) malloc(99999 * sizeof(char));
     memset( (void*)mesg, (int)'\0', 99999 );
@@ -133,8 +138,6 @@ void respond(int n) {
     /*
      * Let the magic commence
      */
-    printf("%s", mesg);
-
     sscanf_ret = sscanf(mesg, "%s %s %s \r\n", request_method, request_path, request_http_version);
 
     if (EOF == sscanf_ret) {
@@ -161,17 +164,48 @@ void respond(int n) {
     // We got method, path and http version: change mesg
     // That 4 comes from the three spaces and \r and \n
     mesg += strlen(request_method) + strlen(request_path) + strlen(request_http_version) + 4;
-    printf("\n\n\nMESG:%s\n\n\n\n", mesg);
 
     data_start_index =  parse_headers(mesg, &content_length);
 
     // If time found, return a message to let the user know what went wrong
     if (0 > data_start_index) {
         write(clients[n], HTTP_BR, HTTP_BR_L);
+        close_stuff(n);
+        return;
     }
 
-    printf("DSI: %d\n", data_start_index);
-    printf("\n\nMESG:%s", mesg + data_start_index);
+    // We can now get the data
+    recieved_data = (char*) malloc((content_length + 1) * sizeof(char));
+
+    if (! recieved_data) {
+        printf("DATA TOO bIG ??\n");
+        write(clients[n], HTTP_BR, HTTP_BR_L);
+        close_stuff(n);
+        return;
+    }
+    recieved_data[content_length] = '\0';
+    i = data_start_index;
+
+    while (i < data_start_index + content_length && mesg[i] != '\0') {
+        recieved_data[i - data_start_index] = mesg[i];
+        i++;
+    }
+
+    jsmn_init(&data_js); 
+    jsmn_ret = jsmn_parse(&data_js, recieved_data, tokens, 5);
+    printf("DATA:%s\n", recieved_data);
+    if (JSMN_SUCCESS != jsmn_ret) {
+        printf("COULD_NOT_PARSE\n");
+        write(clients[n], HTTP_BR, HTTP_BR_L);
+        close_stuff(n);
+        return;
+    }
+
+    for (i = 0; i < 5; ++i) {
+        if (tokens[i].start == 0) continue;
+        printf("TOK[%d]: %s\n", i, get_token_string(recieved_data, tokens[i]));
+    }
+
     write(clients[n], HTTP_OK, HTTP_OK_L);
 
     close_stuff(n);
